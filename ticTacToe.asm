@@ -21,7 +21,7 @@ Display_Game_Menu 	             PROTO
 Main_menu_selection  		     PROTO userInput_2:DWORD
 Print_Instructions_for_PvC_CvC   PROTO
 Print_Instructions_for_to_PvP    PROTO
-validate_input 		     		 PROTO input:DWORD, instance:BYTE
+validate_input 		     		 PROTO user_input:DWORD, instance_t:BYTE
 Display_Game_Board			     PROTO
 Update_Game_Board                PROTO player_type_:BYTE, assign_type_:BYTE, location_:DWORD, gameBoard_:PTR BYTE
 Display_Game_Moves               PROTO gameBoard_2:PTR BYTE
@@ -41,16 +41,15 @@ main proc
 	.code
 		Menu: invoke Display_Game_Menu
 
-		Choice: mov eax, Cyan
+		Menu_choice: mov eax, Cyan
 					   call SetTextColor
-
 					   mov edx, OFFSET select_option
 					   call WriteString
 					   call ReadInt
 							mov userInput1, eax
-							INVOKE validate_input, userInput1, 1
+							INVOKE validate_input, userInput1, 1 	; Validates input
 							cmp dl, 1
-								je Choice
+								je Menu_choice
 							cmp dl, 2
 								je exitProgram
 
@@ -107,8 +106,6 @@ Main_menu_selection PROC x2:DWORD
 		.code
 			push ebp
 			mov ebp, esp
-
-			call Randomize
 
 			cmp user_input2, 1
 				je Option1_GO
@@ -2093,12 +2090,11 @@ COMMENT $
 	- menu
 	- in gameplay
 $
-validate_input PROC input_:DWORD, instance_:BYTE
+validate_input PROC user_input:DWORD, instance_t:BYTE
 		.data
 
-		   input_1    EQU [input_ + 4]
-			instance_type  EQU [instance_ + 4]
-			
+			input_1    		EQU [user_input + 4]
+			instance_type	EQU [instance_t + 4]
 
 			failCheck			   BYTE ?	;
 
@@ -2186,7 +2182,7 @@ validate_input PROC input_:DWORD, instance_:BYTE
 						mov failCheck, 0
 						jmp leaveProc1
 
-			setExitCode: mov failCheck, 2
+			setExitCode: mov failCheck, 2		; Helps in looping main menu
 
 			leaveProc1: mov dl, failCheck
 						leave
