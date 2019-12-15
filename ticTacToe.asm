@@ -2101,6 +2101,7 @@ validate_input PROC input_1:DWORD, instance_type:BYTE
 			overflow_prompt        BYTE        "The number exceeds 32-bits, please try agian. ", 0
 			range_prompt		   BYTE        "Out of range. Please enter 1 - 9. "
 			menuError_prompt       BYTE        "Input must be a 1, 2, 3, or 4. ", 0
+			signed_prompt          BYTE        "Sorry, input must be unsigned. ", 0
 
 		.code
 			push ebp
@@ -2124,7 +2125,9 @@ validate_input PROC input_1:DWORD, instance_type:BYTE
 					 jmp doneChecking
 
 			rangeCmp: cmp input_1, 0	 ; Checks the range of moves in game, 1-9
+						jl RangeSignedError
 						je RangeError
+
 					  cmp input_1, 9
 						jg RangeError
 					jmp doneChecking
@@ -2134,6 +2137,9 @@ validate_input PROC input_1:DWORD, instance_type:BYTE
 
 			MenuError: mov edx, OFFSET menuError_prompt
 					   jmp displayError
+
+			RangeSignedError: mov edx, OFFSET signed_prompt
+						jmp displayError
 
 			RangeError: mov edx, OFFSET range_prompt
 						jmp displayError
