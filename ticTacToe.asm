@@ -4,24 +4,24 @@ include IRVINE32.inc
 
 
 .data
-;Start_PvC_Game                   PROTO name_:PTR BYTE, name_size:BYTE
+playerVsComputerMode                  PROTO name_:PTR BYTE, name_size:BYTE
 ;Start_PvP_Game                   PROTO name_1:PTR BYTE, name_size1:BYTE,name_2:PTR BYTE, name_size2:BYTE
-;Start_CvC_Game			         PROTO
+;Start_CvC_Game			          PROTO
 
-;Display_Game_statics             PROTO count1:BYTE,count2:BYTE,count3:BYTE
-gameMenu 					     PROTO
-;Main_menu_selection  		     PROTO userInput_2:DWORD
-;Print_Instructions_for_PvC_CvC   PROTO
-;Print_Instructions_for_to_PvP    PROTO
-validateUserInput 		     PROTO userInput_:DWORD, instanceType_:BYTE
-;Display_Game_Board			     PROTO
+gamesPlayed                PROTO 
+gameMenu 						  PROTO
+selectMenu		      PROTO 
+instructionsForPlayerVsComputer   PROTO
+;instructionsForPlayerVsPlayer   PROTO
+validateUserInput 		          PROTO userInput_:DWORD, instanceType_:BYTE
+;Display_Game_Board			      PROTO
 ;Update_Game_Board                PROTO player_type_:BYTE, assign_type_:BYTE, location_:DWORD, gameBoard_:PTR BYTE
 ;Display_Game_Moves               PROTO gameBoard_2:PTR BYTE
-;Screen_xy_coordinet		         PROTO pos_num_:BYTE																				              
-;Check_Winner_for_PvP		     PROTO gameBoard_3:DWORD, num_moves_:BYTE, name_221:PTR BYTE,name_222:PTR BYTE, P1_param:BYTE, instanceType_param2:BYTE
-;Check_Winner_for_PvC_CvC	     PROTO gameBoard_3:DWORD, num_moves_:BYTE, name_:PTR BYTE, P1_:BYTE, instanceType_2:BYTE
-;Test_the_winner		             PROTO param1:BYTE, param2:DWORD, param3:BYTE, param4:DWORD, param5:BYTE, param6:DWORD, gameBoard_3:PTR BYTE	  
-;Display_winner_Draw			     PROTO l_1:BYTE, h_2:BYTE, l_3:BYTE, h_4:BYTE, l_5:BYTE, h_6:BYTE, path_type_:BYTE
+;Screen_xy_coordinet		      PROTO pos_num_:BYTE																				              
+;Check_Winner_for_PvP		      PROTO gameBoard_3:DWORD, num_moves_:BYTE, name_221:PTR BYTE,name_222:PTR BYTE, P1_param:BYTE, instanceType_param2:BYTE
+;Check_Winner_for_PvC_CvC	      PROTO gameBoard_3:DWORD, num_moves_:BYTE, name_:PTR BYTE, P1_:BYTE, instanceType_2:BYTE
+;Test_the_winner		          PROTO param1:BYTE, param2:DWORD, param3:BYTE, param4:DWORD, param5:BYTE, param6:DWORD, gameBoard_3:PTR BYTE	  
+;Display_winner_Draw			  PROTO l_1:BYTE, h_2:BYTE, l_3:BYTE, h_4:BYTE, l_5:BYTE, h_6:BYTE, path_type_:BYTE
 
 ;Variables declaration
 userInput dword 0
@@ -32,30 +32,65 @@ selectOption byte "                                                Choice: ", 0
 				   BYTE "                                          1. Player vs. Computer      ", 0
 				   BYTE "                                          2. Computer vs. Computer    ", 0
 				   BYTE "                                          3. Player vs. Player        ", 0
-				   BYTE "                                          4. exit                     ", 0
+				   BYTE "                                          4. Games Played             ", 0
+				   BYTE "                                          5. exit                     ", 0
 		
 ;varibales for validation of input
 failCheck			   BYTE ?	
 overflowPrompt         BYTE        "that number exceeds 32-bits,Please try agian. ", 0
 signedPrompt           BYTE        "Sorry, input must be unsigned. ", 0
-rangePrompt		   BYTE        "That is not a valid move. Please enter 1 - 9. "
-menuErrorPrompt       BYTE        "Input must be a 1, 2, 3, or 4. ", 0
+rangePrompt			   BYTE        "That is not a valid move. Please enter 1 - 9. "
+menuErrorPrompt        BYTE        "Input must be a 1, 2, 3, or 4. ", 0
+;variables for selectMenu procedure
+counterForPvC byte 0
+counterForCvC byte 0
+counterForPvP byte 0
+numOfGamesInPlayerVSComputer BYTE "                        The number of player vs computer games played is : ",0 
+numOfGamesInComputerVsComputer BYTE "                        The number of computer vs computer games played is : ",0 
+numOfGamesInPlayerVsPlayer BYTE "                        The number of player vs player games played is : ",0 
+instructions    BYTE "                                                    TIC-TAC-TOE                                         ", 0
+				BYTE "                To win the game,you have to get three Xs in a row on the board before the computer.   ", 0
+				BYTE "                  When chosing a move, enter a number corresponding to the position on the board      ", 0
+				BYTE "                                                                                                      ", 0
+boardModle      BYTE "                                                                                                        ", 0
+				BYTE "                                                           - | - | -                                    ", 0
+				BYTE "                                                           - | - | -                                    ", 0
+				BYTE "                                                           - | - | -                                    ", 0
+playerNamePrompt   BYTE "                               Enter your name to begin: ", 0
+playerName     BYTE 50 DUP(0)	
+sizeOfName      BYTE ?	
+gameBoard	       BYTE 9 DUP(0)						
+gameTitle	       BYTE  0						
+user_selection     BYTE " Computer vs. Computer", 0
+computerMove       BYTE 0			
+movNumber	       BYTE 0						
+computer_selection DWORD 0						
+name_offset		   DWORD ?						
+firstGo		       BYTE ?						
+player_user_type   BYTE ?						
+comp_user_type     BYTE ?						
+runOnce			   BYTE ?						
+			
 
 .code
 main proc
-	invoke gameMenu
-	choice: mov eax,white
+	menu: invoke gameMenu
+	choice: mov eax,green
 			call SetTextColor
 			mov edx, offset selectOption
 			call WriteString
 			call ReadDec
 			mov userInput,eax
-			INVOKE validateUserInput, userInput, 1	
-			cmp dl, 1							
+			invoke validateUserInput,userInput,1
+			cmp dl,1							
 					
 			je choice
 			cmp dl, 2							
 			je Exit_
+MOV eax,0
+mov eax,userInput
+caLL selectMenu
+jmp menu
 
 	
 	Exit_: 
@@ -73,8 +108,8 @@ gameMenu proc
 
 	mov ecx,5		;setting counter
 	mov bl,0		
-	mov eax, white		;moving color name in eax register
-	call SetTextColor		;setting the color of the text
+	mov eax, green		;moving color name in eax register
+	call SetTextColor	;setting the color of the text
 
 	printMenuLabel: mov edx, offset printMenu		;moving address of printMenu string into edx
 					mov eax,0		
@@ -91,39 +126,37 @@ gameMenu proc
 	call CRLF
 
 	ret		;returning to main proc
-
 gameMenu endp
 
 
-;Procedure to validate user input 
-
+;Procedure to validate user input
 validateUserInput PROC x1:DWORD, y1:BYTE	
 		.data
 			userInput1    EQU [x1 + 4]
 			instanceType  EQU [y1 + 4]
-			
+
 		.code
 			push ebp							
 			mov ebp, esp
 			
 			jo overflowError					
 			cmp userInput1, 0					
-				jl rangeCompare		
+				jl rangeCmp			
 				
 			cmp instanceType, 1				
-				je menuCompare
+				je menuCmp
 			cmp instanceType, 2			
-				je rangeCompare
+				je rangeCmp
 			cmp instanceType, 3				
-				je rangeCompare
+				je rangeCmp
 			
-			menuCompare: cmp userInput1, 4		 
+			menuCmp: cmp userInput1	, 5		 
 						jg menuError
 					 cmp userInput1, 0
 						jle menuError
 					 jmp doneChecking	
 						 
-			rangeCompare: cmp userInput1, 0
+			rangeCmp: cmp userInput1, 0
 						jl RangeSignedError
 						je RangeError
 					  cmp userInput1, 9
@@ -186,4 +219,129 @@ validateUserInput PROC x1:DWORD, y1:BYTE
 			   
 	ret
 validateUserInput ENDP
+
+selectMenu PROC 
+
+			call Randomize
+			
+			cmp eax, 1
+				je option1
+			cmp eax, 2
+				je option2
+			cmp eax, 3
+				je option3
+			cmp eax, 4
+				je option4
+			cmp eax, 5
+				je option4
+				
+			
+			Option1:    call instructionsForPlayerVsComputer
+						call Clrscr
+						inc counterForPvC
+						jmp exitProcedure
+
+
+
+			Option2:    ;call Start_CvC_Game
+						call Clrscr
+						inc counterForCvC
+						jmp exitProcedure
+
+
+			Option3:    ;call Print_Instructions_for_to_PvP 
+						call Clrscr
+						inc counterForCvC
+						jmp exitProcedure
+			Option4:	call gamesPlayed		
+	exitProcedure:	leave
+	ret
+selectMenu ENDP
+
+
+
+;Procedure to keep record of number of games played for each module
+gamesPlayed   PROC 
+	call Clrscr 
+	call Crlf
+	call Crlf
+	call Crlf
+	mov edx,offset numOfGamesInPlayervsComputer
+	call WriteString
+	mov al, counterForPvC
+	call WriteInt
+	call Crlf
+	
+	mov edx,offset numOfGamesInComputervsComputer
+	call WriteString
+	mov al, counterForCvC
+	call WriteInt
+	call Crlf
+
+	mov edx,offset numOfGamesInPlayerVsPlayer
+	call WriteString
+	mov al, counterForPvP
+	call WriteInt
+	
+	call Crlf
+	call Crlf
+	call WaitMsg
+	exit	
+gamesPlayed ENDP
+
+
+;procedure to print instructions for palyer vs computer game
+instructionsForPlayerVsComputer PROC
+
+call Clrscr
+mov ecx,4
+mov bl,0
+
+printInstructions: 
+			mov edx,offset instructions
+			mov eax,0
+			mov al,lengthof instructions
+			mul bl
+
+			add edx,eax
+			call writestring
+			call crlf
+			add bl,1
+			loop printInstructions
+		mov ecx,4
+		mov bl,0
+
+
+printBoard:
+			mov edx,offset boardModle
+			mov eax,0
+			mov al,lengthof boardModle
+			mul bl
+
+			add edx,eax
+			call writestring
+			call crlf
+			add bl,1
+			loop printBoard
+
+		call crlf
+		call crlf
+		mov edx,offset playerNamePrompt
+		call writestring
+
+		mov edx,offset playerName
+		mov ecx,sizeOf playerName
+		call readstring
+		mov sizeOfName,al
+
+	    ;call playerVsComputerMode
+		leave
+		ret
+instructionsForPlayerVsComputer endp
+
+
+
+
 END main
+
+
