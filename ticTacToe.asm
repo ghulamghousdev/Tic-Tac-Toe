@@ -21,7 +21,7 @@ Display_Game_Menu 	             PROTO
 Main_menu_selection  		     PROTO userInput_2:DWORD
 Print_Instructions_for_PvC_CvC   PROTO
 Print_Instructions_for_to_PvP    PROTO
-validate_input 		     		 PROTO userInput_:DWORD, instanceType_:BYTE
+validate_input 		     		 PROTO input:DWORD, instance:BYTE
 Display_Game_Board			     PROTO
 Update_Game_Board                PROTO player_type_:BYTE, assign_type_:BYTE, location_:DWORD, gameBoard_:PTR BYTE
 Display_Game_Moves               PROTO gameBoard_2:PTR BYTE
@@ -2093,8 +2093,12 @@ COMMENT $
 	- menu
 	- in gameplay
 $
-validate_input PROC input_1:DWORD, instance_type:BYTE
+validate_input PROC input_:DWORD, instance_:BYTE
 		.data
+
+		   input_1    EQU [input_ + 4]
+			instance_type  EQU [instance_ + 4]
+			
 
 			failCheck			   BYTE ?	;
 
@@ -2186,7 +2190,6 @@ validate_input PROC input_1:DWORD, instance_type:BYTE
 
 			leaveProc1: mov dl, failCheck
 						leave
-
 	ret
 validate_input ENDP
 END main
