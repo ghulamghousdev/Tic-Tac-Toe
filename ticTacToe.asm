@@ -200,7 +200,7 @@ Print_Instructions_PvC_CvC PROC
 						    BYTE "                To win the game,you have to get three Xs in a row on the board before the computer.   ", 0
 						    BYTE "                  When chosing a move, enter a number corresponding to the position on the board      ", 0
 						    BYTE "                                                                                                      ", 0
-			board_instruction BYTE "                                                                                                        ", 0
+			board_pvc BYTE "                                                                                                        ", 0
 						  BYTE "                                                           - | - | -                                    ", 0
 						  BYTE "                                                           - | - | -                                    ", 0
 						  BYTE "                                                           - | - | -                                    ", 0
@@ -237,9 +237,9 @@ Print_Instructions_PvC_CvC PROC
 			mov bl, 0
 			mov eax, white
 			call SetTextColor
-			printMenu2: mov edx, OFFSET board_instruction 	; Prints tic-tac board
+			printMenu2: mov edx, OFFSET board_pvc 	; Prints tic-tac board
 					    mov eax, 0
-					    mov al, LENGTHOF board_instruction
+					    mov al, LENGTHOF board_pvc
 					    mul bl
 
 					    add edx, eax
@@ -277,7 +277,7 @@ Print_Instructions_for_to_PvP PROC
 						    BYTE "                To win the game,you have to get three Xs in a row on the board before the computer.     ", 0
 						    BYTE "                  When chosing a move, enter a number corresponding to the position on the board        ", 0
 						    BYTE "                                                                                                        ", 0
-			board_instruction BYTE "                                                                                                        ", 0
+			board_pvp BYTE "                                                                                                        ", 0
 						    BYTE "                                                           - | - | -                                    ", 0
 						    BYTE "                                                           - | - | -                                    ", 0
 						    BYTE "                                                           - | - | -                                    ", 0
@@ -319,9 +319,9 @@ Print_Instructions_for_to_PvP PROC
 			mov bl, 0
 			mov eax, white
 			call SetTextColor
-			printMenu2: mov edx, OFFSET board_instruction
+			printMenu2: mov edx, OFFSET board_pvp
 					    mov eax, 0
-					    mov al, LENGTHOF board_instruction
+					    mov al, LENGTHOF board_pvp
 					    mul bl
 
 					    add edx, eax
