@@ -16,10 +16,10 @@ Start_PvC_Game                   PROTO name_:PTR BYTE, name_size:BYTE
 Start_PvP_Game                   PROTO name_1:PTR BYTE, name_size1:BYTE,name_2:PTR BYTE, name_size2:BYTE
 Start_CvC_Game			         PROTO
 
-Display_Game_statics             PROTO count1:BYTE,count2:BYTE,count3:BYTE
+Display_games_played             PROTO count1:BYTE,count2:BYTE,count3:BYTE
 Display_Game_Menu 	             PROTO
 Main_menu_selection  		     PROTO userInput_2:DWORD
-Print_Instructions_for_PvC_CvC   PROTO
+Print_Instructions_PvC_CvC   PROTO
 Print_Instructions_for_to_PvP    PROTO
 validate_input 		     		 PROTO user_input:DWORD, instance_t:BYTE
 Display_Game_Board			     PROTO
@@ -74,32 +74,36 @@ Display_Game_Menu proc
 		call Crlf
 		call Crlf
 
-		mov ecx, 5
+		mov ecx, 5		; Counter to print 5 lines of the menu
 		mov bl, 0
 		mov eax, lightGreen
 		call SetTextColor
 		printMenu2: mov edx, OFFSET Print_Menu
 				    mov eax, 0
 				    mov al, LENGTHOF Print_Menu
-				    mul bl
+				    mul bl 						; To move to next line
 
 				    add edx, eax
 				    call WriteString
 				    call Crlf
 				    inc bl
-		loop printMenu2
+		loop printMenu2		; Loops the whole menu
 
 		call Crlf
 		call Crlf
 
 		ret
-
 Display_Game_Menu endp
 
 
+COMMENT $
+	PROCEDURE: In Main Menu compares input, increments counter of each
+	gametype for keeping statistics and calls the respective procedure
+$
 Main_menu_selection PROC x2:DWORD
 		.data
 			user_input2 EQU [x2 + 4]
+			; counters for statistics
 			counter_PvC BYTE 0
 		    counter_CvC BYTE 0
 		    counter_PvP BYTE 0
@@ -117,28 +121,29 @@ Main_menu_selection PROC x2:DWORD
 				je Option4_GO
 
 
-			Option1_GO: INVOKE Print_Instructions_for_PvC_CvC
+			Option1_GO: INVOKE Print_Instructions_PvC_CvC	; Calls PvC
 						call Clrscr
 						inc counter_PvC
 						jmp leaveProc2
-			Option2_GO: INVOKE Start_CvC_Game
+			Option2_GO: INVOKE Start_CvC_Game	; Calls CvC
 						call Clrscr
 						inc counter_CvC
 						jmp leaveProc2
-			Option3_GO: INVOKE Print_Instructions_for_to_PvP
+			Option3_GO: INVOKE Print_Instructions_for_to_PvP	; Calls PvP
 						call Clrscr
 						inc counter_CvC
 						jmp leaveProc2
-			Option4_GO:	INVOKE Display_Game_statics, counter_PvC, counter_CvC, counter_PvP
-
-
+			; On exit, show statistics of all games played
+			Option4_GO:	INVOKE Display_games_played, counter_PvC, counter_CvC, counter_PvP
 
 	leaveProc2:	leave
 	ret
-
-
 Main_menu_selection ENDP
-Display_Game_statics   PROC count1_PvC:BYTE,count2_CvC:BYTE,count3_PvP:BYTE
+
+COMMENT $
+	PROCEDURE: Displays the stats of games played when user exits the main menu
+$
+Display_games_played   PROC count1_PvC:BYTE,count2_CvC:BYTE,count3_PvP:BYTE
 	.data
 		statics_msg_PvC BYTE "                        The number of PvC played is : ",0
 		statics_msg_CvC BYTE "                        The number of CvC played is : ",0
@@ -181,17 +186,21 @@ Display_Game_statics   PROC count1_PvC:BYTE,count2_CvC:BYTE,count3_PvP:BYTE
 	call Crlf
 	mov eax,red
 	call SetTextColor
-	call WaitMsg
+	call WaitMsg		; Waits for exit
 	exit
-Display_Game_statics ENDP
+Display_games_played ENDP
 
-Print_Instructions_for_PvC_CvC PROC
+COMMENT $
+	Prints instructions for PvC and CvC
+$
+
+Print_Instructions_PvC_CvC PROC
 	.data
 			instructions    BYTE "                                                    TIC-TAC-TOE                                         ", 0
 						    BYTE "                To win the game,you have to get three Xs in a row on the board before the computer.   ", 0
 						    BYTE "                  When chosing a move, enter a number corresponding to the position on the board      ", 0
 						    BYTE "                                                                                                      ", 0
-			board_instruc BYTE "                                                                                                        ", 0
+			board_instruction BYTE "                                                                                                        ", 0
 						  BYTE "                                                           - | - | -                                    ", 0
 						  BYTE "                                                           - | - | -                                    ", 0
 						  BYTE "                                                           - | - | -                                    ", 0
@@ -199,18 +208,18 @@ Print_Instructions_for_PvC_CvC PROC
 
 			name_prompt   BYTE "                               Enter your name to begin: ", 0
 
-			name_str      BYTE 50 DUP(0)
-			name_size     BYTE ?
+			name_str      BYTE 50 DUP(0)	; For player name
+			name_size     BYTE ?			; For player name size
 	.code
 			push ebp
 			mov ebp, esp
 			call Clrscr
 
-			mov ecx, 4
+			mov ecx, 4 		; four lines of instructions
 			mov bl, 0
 			mov eax, lightGreen
 			call SetTextColor
-			printMenu: mov edx, OFFSET instructions
+			printMenu: mov edx, OFFSET instructions 	; Loops four lines of instructions
 					   mov eax, 0
 					   mov al, LENGTHOF instructions
 					   mul bl
@@ -228,9 +237,9 @@ Print_Instructions_for_PvC_CvC PROC
 			mov bl, 0
 			mov eax, white
 			call SetTextColor
-			printMenu2: mov edx, OFFSET board_instruc
+			printMenu2: mov edx, OFFSET board_instruction 	; Prints tic-tac board
 					    mov eax, 0
-					    mov al, LENGTHOF board_instruc
+					    mov al, LENGTHOF board_instruction
 					    mul bl
 
 					    add edx, eax
@@ -243,51 +252,58 @@ Print_Instructions_for_PvC_CvC PROC
 			call Crlf
 			call Crlf
 
-			mov edx, OFFSET name_prompt
+			mov edx, OFFSET name_prompt 	; Asks for user name
 			call WriteString
 
+			; Takes input of the player name
 			mov edx, OFFSET name_str
 			mov ecx, SIZEOF name_str
 			call ReadString
 			mov name_size, al
 
-			INVOKE Start_PvC_Game, ADDR name_str, name_size
+			INVOKE Start_PvC_Game, ADDR name_str, name_size 	; Starts PvC game
 
 			leave
 	ret
-Print_Instructions_for_PvC_CvC ENDP
+Print_Instructions_PvC_CvC ENDP
+
+
+COMMENT &
+	Prints the instructions for PvP mode
+&
 Print_Instructions_for_to_PvP PROC
 	.data
-			instructions22  BYTE "                                                    TIC-TAC-TOE                                         ", 0
+			instructions_PvP  BYTE "                                                    TIC-TAC-TOE                                         ", 0
 						    BYTE "                To win the game,you have to get three Xs in a row on the board before the computer.     ", 0
 						    BYTE "                  When chosing a move, enter a number corresponding to the position on the board        ", 0
 						    BYTE "                                                                                                        ", 0
-			board_instruc22 BYTE "                                                                                                        ", 0
+			board_instruction BYTE "                                                                                                        ", 0
 						    BYTE "                                                           - | - | -                                    ", 0
 						    BYTE "                                                           - | - | -                                    ", 0
 						    BYTE "                                                           - | - | -                                    ", 0
 
 
-			name_prompt21   BYTE "                               Enter player 1 name : ", 0
-			name_prompt22   BYTE "                               Enter player 2 name : ", 0
+			name_prompt1   BYTE "                               Enter player 1 name : ", 0
+			name_prompt2   BYTE "                               Enter player 2 name : ", 0
 
-			name_str21      BYTE 50 DUP(0)
-			name_size21     BYTE ?
+			name_str1      BYTE 50 DUP(0)
+			name_size1     BYTE ?
 
-			name_str22      BYTE 50 DUP(0)
-			name_size22    BYTE ?
+			name_str2      BYTE 50 DUP(0)
+			name_size2     BYTE ?
 	.code
 			push ebp
 			mov ebp, esp
 			call Clrscr
 
-			mov ecx, 4
+			mov ecx, 4 		; For printing instructions
 			mov bl, 0
 			mov eax, lightGreen
 			call SetTextColor
-			printMenu: mov edx, OFFSET instructions22
+
+			printMenu: mov edx, OFFSET instructions_PvP
 					   mov eax, 0
-					   mov al, LENGTHOF instructions22
+					   mov al, LENGTHOF instructions_PvP
 					   mul bl
 
 					   add edx, eax
@@ -299,13 +315,13 @@ Print_Instructions_for_to_PvP PROC
 					   inc bl
 			loop printMenu
 
-			mov ecx, 4
+			mov ecx, 4 		; For printing game board
 			mov bl, 0
 			mov eax, white
 			call SetTextColor
-			printMenu2: mov edx, OFFSET board_instruc22
+			printMenu2: mov edx, OFFSET board_instruction
 					    mov eax, 0
-					    mov al, LENGTHOF board_instruc22
+					    mov al, LENGTHOF board_instruction
 					    mul bl
 
 					    add edx, eax
@@ -318,66 +334,68 @@ Print_Instructions_for_to_PvP PROC
 			call Crlf
 			call Crlf
 
-			mov edx, OFFSET name_prompt21
+			mov edx, OFFSET name_prompt1
 			call WriteString
 
-			mov edx, OFFSET name_str21
-			mov ecx, SIZEOF name_str21
-			call ReadString
-			mov name_size21, al
+			mov edx, OFFSET name_str1
+			mov ecx, SIZEOF name_str1
+			call ReadString 			; Take name from user
+			mov name_size1, al
 
-			mov edx, OFFSET name_prompt22
+			mov edx, OFFSET name_prompt2
 			call WriteString
 
-			mov edx, OFFSET name_str22
-			mov ecx, SIZEOF name_str22
+			mov edx, OFFSET name_str2
+			mov ecx, SIZEOF name_str2
 			call ReadString
-			mov name_size22, al
+			mov name_size2, al
 
-			INVOKE Start_PvP_Game, ADDR name_str21, name_size21,ADDR name_str22,  name_size22
+			; Start Player vs Player game
+			INVOKE Start_PvP_Game, ADDR name_str1, name_size1,ADDR name_str2,  name_size2
 
 			leave
 	ret
 Print_Instructions_for_to_PvP ENDP
-Start_PvP_Game PROC x31:PTR BYTE, y21:BYTE,x32:PTR BYTE, y22:BYTE
+
+
+Start_PvP_Game PROC name_pvp_1:PTR BYTE, size_pvp_1:BYTE, name_pvp_2:PTR BYTE, size_pvp_2:BYTE
 		.data
-			player_name21 EQU [x31 + 4]
-			sizeOfName21  EQU [y21 + 4]
-			player_name22 EQU [x32 + 4]
-			sizeOfName22  EQU [y22 + 4]
+			; Handling parameters
+			player_name_1 EQU [name_pvp_1 + 4]
+			sizeOfName21  EQU [size_pvp_1 + 4]
+			player_name_2 EQU [name_pvp_2 + 4]
+			sizeOfName22  EQU [size_pvp_2 + 4]
 
-			gameBoard22	       BYTE 9 DUP(0)
-			gameTitle22	       BYTE "  vs  ", 0
+			; Strings
+			gameBoard_2	       BYTE 9 DUP(0)
+			gameTitle_2	       BYTE "  vs  ", 0
 
-			movNumber22	       BYTE 0
-			user_selection21     DWORD 0
-			user_selection22    DWORD 0
-			;//computer_selection DWORD 0
-			name_offset21		   DWORD ?
-			name_offset22		   DWORD ?
-			firstGo22		       BYTE ?
-			player_user_type2   BYTE ?
-			player_user_type3   BYTE ?
-			comp_user_type2     BYTE ?
-			runOnce22			   BYTE ?
+			movNumber	       BYTE 0
+			user_selection_1   DWORD 0
+			user_selection_2   DWORD 0
+
+			name_offset_1	   DWORD ?
+			name_offset_2	   DWORD ?
+			firstGo22		   BYTE ?
+			player_user_type2  BYTE ?
+			player_user_type3  BYTE ?
+			comp_user_type2    BYTE ?
+			runOnce22		   BYTE ?
 
 		.code
 			push ebp
 			mov ebp, esp
 
 
-			mov ebx, player_name21
-			mov name_offset21, ebx
+			mov ebx, player_name_1
+			mov name_offset_1, ebx
 			cmp runOnce2, 1
 				je clearTable
 
-			mov ebx, player_name22
-			mov name_offset22, ebx
+			mov ebx, player_name_2
+			mov name_offset_2, ebx
 			cmp runOnce2, 1
 				je clearTable
-
-
-
 
 			preGame: mov movNumber2, 1
 
@@ -390,7 +408,7 @@ Start_PvP_Game PROC x31:PTR BYTE, y21:BYTE,x32:PTR BYTE, y22:BYTE
 
 			clearTable: mov ecx, 9
 						mov al, 0
-						mov esi, OFFSET gameBoard22
+						mov esi, OFFSET gameBoard_2
 						zeroOut: mov [esi], al
 								 inc esi
 						loop zeroOut
@@ -410,26 +428,25 @@ Start_PvP_Game PROC x31:PTR BYTE, y21:BYTE,x32:PTR BYTE, y22:BYTE
 				  mov eax, white
 				  call SetTextColor
 
-
-				  mov edx, player_name21
+				  mov edx, player_name_1
 				  call WriteString
 
-				  mov edx, offset gameTitle22
+				  mov edx, offset gameTitle_2
 				  call WriteString
 
-				  mov edx, player_name22
+				  mov edx, player_name_2
 				  call WriteString
 
 				  call Crlf
 				  call Crlf
 
 				  INVOKE Display_Game_Board
-				  INVOKE Display_Game_Moves, ADDR gameBoard22
+				  INVOKE Display_Game_Moves, ADDR gameBoard_2
 
-				  cmp movNumber22, 9
-					  jg leaveProc4
+				  cmp movNumber, 9 		; If 9 moves played, end the game
+				  jg leaveProc4
 
-				  INVOKE Check_Winner_for_PvP, ADDR gameBoard22, movNumber22, name_offset21,name_offset22, firstGo22, 0
+				  INVOKE Check_Winner_for_PvP, ADDR gameBoard_2, movNumber, name_offset_1,name_offset_2, firstGo22, 0
 				  cmp dl, 0
 					  je keepPlaying
 				  cmp dl, 1
@@ -443,7 +460,7 @@ Start_PvP_Game PROC x31:PTR BYTE, y21:BYTE,x32:PTR BYTE, y22:BYTE
 				  call Gotoxy
 
 				  mov eax, 0
-				  mov al, movNumber22
+				  mov al, movNumber
 				  mov bl, 2
 				  div bl
 
@@ -475,7 +492,7 @@ Start_PvP_Game PROC x31:PTR BYTE, y21:BYTE,x32:PTR BYTE, y22:BYTE
 
 									   mov player_user_type2, 0
 
-							     cont1: mov edx, player_name21
+							     cont1: mov edx, player_name_1
 										call WriteString
 										mov al, ':'
 										call WriteChar
@@ -496,7 +513,7 @@ Start_PvP_Game PROC x31:PTR BYTE, y21:BYTE,x32:PTR BYTE, y22:BYTE
 
 									   mov player_user_type3, 0
 
-							     cont2: mov edx, player_name22
+							     cont2: mov edx, player_name_2
 										call WriteString
 										mov al, ':'
 										call WriteChar
@@ -509,16 +526,16 @@ Start_PvP_Game PROC x31:PTR BYTE, y21:BYTE,x32:PTR BYTE, y22:BYTE
 
 								   mov eax, 0
 								   call ReadDec
-									  mov user_selection21, eax
-									  INVOKE validate_input, user_selection21, 3
+									  mov user_selection_1, eax
+									  INVOKE validate_input, user_selection_1, 3
 										  cmp dl, 1
 											  je Game
 
-								   INVOKE Update_Game_Board, 0, player_user_type2, user_selection21, ADDR gameBoard22
+								   INVOKE Update_Game_Board, 0, player_user_type2, user_selection_1, ADDR gameBoard_2
 								   cmp dl, 1
 									  je user_selections
 
-								   inc movNumber22
+								   inc movNumber
 								   jmp Game
 
 				  user_selection221 : mov eax, white
@@ -526,23 +543,23 @@ Start_PvP_Game PROC x31:PTR BYTE, y21:BYTE,x32:PTR BYTE, y22:BYTE
 
 								   mov eax, 0
 								   call ReadDec
-								      mov user_selection22, eax
-								      INVOKE validate_input, user_selection22, 3
-										  cmp dl, 1
+						      mov user_selection_2, eax
+					      INVOKE validate_input, user_selection_2, 3
+									  cmp dl, 1
 											  je Game
 
-								   INVOKE Update_Game_Board, 2, player_user_type3  , user_selection22, ADDR gameBoard22
-								   cmp dl, 1
+								   INVOKE Update_Game_Board, 2, player_user_type3  , user_selection_2, ADDR meBoard22
+								   mp dl, 1
 									  je user_selection221
 
 
 
-								   inc movNumber22
+								   inc movNumber
 								   jmp Game
 
-			leaveProc4: cmp movNumber22, 10
+			leaveProc4: cmp movNumber, 10
 							jne justleave
-						INVOKE Check_Winner_for_PvP, ADDR gameBoard22, movNumber22, name_offset21,name_offset22, firstGo22, 0
+						INVOKE Check_Winner_for_PvP, ADDR gameBoard_2, movNumber22, name_offset_1,name_offset_2, firstGo22, 0
 			justleave:	mov runOnce2, 1
 			            leave
 	ret
@@ -1893,6 +1910,8 @@ Display_winner_Draw PROC l_p1:BYTE, h_p2:BYTE, l_p3:BYTE, h_p4:BYTE, l_p5:BYTE, 
 			leave
 	ret
 Display_winner_Draw ENDP
+
+
 Start_CvC_Game PROC
 		.data
 			gameBoard2	       BYTE 9 DUP(0)
