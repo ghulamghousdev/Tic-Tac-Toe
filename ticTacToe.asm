@@ -397,7 +397,7 @@ Start_PvP_Game PROC name_pvp_1:PTR BYTE, size_pvp_1:BYTE, name_pvp_2:PTR BYTE, s
 			cmp runOnce2, 1
 				je clearTable
 
-			preGame: mov movNumber_pvp2, 1
+			preGame: mov movNumber_pvp, 1
 
 			mov eax, 0
 			mov al, 2
