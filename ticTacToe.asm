@@ -12,7 +12,7 @@ COMMENT &
 INCLUDE Irvine32.inc
 
 
-Start_PvC_Game                   PROTO name_:PTR BYTE, name_size:BYTE
+Start_PvC_Game                   PROTO name_:PTR BYTE
 Start_PvP_Game                   PROTO name_1:PTR BYTE,name_2:PTR BYTE
 Start_CvC_Game			         PROTO
 
@@ -261,7 +261,7 @@ Print_Instructions_PvC_CvC PROC
 			call ReadString
 			mov name_size, al
 
-			INVOKE Start_PvC_Game, ADDR name_str, name_size 	; Starts PvC game
+			INVOKE Start_PvC_Game, ADDR name_str 	; Starts PvC game
 
 			leave
 	ret
@@ -561,10 +561,9 @@ Start_PvP_Game PROC name_pvp_1:PTR BYTE, name_pvp_2:PTR BYTE
 	ret
 Start_PvP_Game ENDP
 
-Start_PvC_Game PROC x3:PTR BYTE, y2:BYTE
+Start_PvC_Game PROC name_pvc:PTR BYTE
 		.data
-			player_name EQU [x3 + 4]
-			sizeOfName  EQU [y2 + 4]
+			player_name EQU [name_pvc + 4]
 
 			gameBoard	       BYTE 9 DUP(0)
 
