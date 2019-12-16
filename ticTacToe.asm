@@ -1,16 +1,4 @@
-COMMENT &
- Some of the features of the game are:
- 1-> when we are playing PvC or PvP, the game accept
-	the name of the players.
- 2-> When some one win the game, it will display three large
-    boxs to show how the winner winning line.
- 3->All the codes were completely organazed
-&
-
-
-
 INCLUDE Irvine32.inc
-
 
 Start_PvC_Game                   PROTO name_:PTR BYTE
 Start_PvP_Game                   PROTO name_1:PTR BYTE,name_2:PTR BYTE
@@ -25,7 +13,7 @@ validate_input 		     		 PROTO user_input:DWORD, instance_t:BYTE
 Display_Game_Board			     PROTO
 Update_Game_Board                PROTO player_type_:BYTE, assign_type_:BYTE, location_:DWORD, gameBoard_:PTR BYTE
 Display_Game_Moves               PROTO gameBoard_2:PTR BYTE
-Screen_xy_coordinet		         PROTO pos_num_:BYTE
+Set_position		             PROTO pos_num_:BYTE
 Check_Winner_for_PvP		     PROTO gameBoard_3:DWORD, num_moves_:BYTE, name_221:PTR BYTE,name_222:PTR BYTE, P1_param:BYTE, instanceType_param2:BYTE
 Check_Winner_for_PvC_CvC	     PROTO gameBoard_3:DWORD, num_moves_:BYTE, name_:PTR BYTE, P1_:BYTE, instanceType_2:BYTE
 Test_the_winner		             PROTO param1:BYTE, param2:DWORD, param3:BYTE, param4:DWORD, param5:BYTE, param6:DWORD, gameBoard_3:PTR BYTE
@@ -63,9 +51,9 @@ Display_Game_Menu proc
 	.data
 
 		Print_Menu BYTE "                                                                      ", 0
-				   BYTE "                                          1. Player vs. Computer      ", 0
-				   BYTE "                                          2. Computer vs. Computer    ", 0
-				   BYTE "                                          3. Player vs. Player        ", 0
+				   BYTE "                                          1. Player VS. Computer      ", 0
+				   BYTE "                                          2. Computer VS. Computer    ", 0
+				   BYTE "                                          3. Player VS. Player        ", 0
 				   BYTE "                                          4. exit                     ", 0
 
 
@@ -350,7 +338,7 @@ Print_Instructions_for_to_PvP PROC
 			call ReadString
 			mov name_size2, al
 
-			; Start Player vs Player game
+			; Start Player VS Player game
 			INVOKE Start_PvP_Game, ADDR name_str1, ADDR name_str2
 
 			leave
@@ -366,7 +354,7 @@ Start_PvP_Game PROC name_pvp_1:PTR BYTE, name_pvp_2:PTR BYTE
 
 			; Strings
 			gameBoard_2	       BYTE 9 DUP(0)
-			gameTitle_2	       BYTE "  vs  ", 0
+			gameTitle_2	       BYTE "  VS  ", 0
 
 			movNumber_pvp	       BYTE 0
 			user_selection_1   DWORD 0
@@ -566,7 +554,7 @@ Start_PvC_Game PROC name_pvc:PTR BYTE
 
 			player_name EQU [name_pvc + 4]				; Handling parameter
 			gameBoard	       BYTE 9 DUP(0)			; Prints game board
-			gameTitle	       BYTE " vs. Computer", 0	; 'Name' vs Computer
+			gameTitle	       BYTE " VS. Computer", 0	; 'Name' VS Computer
 			computerMove       BYTE "Computer: ", 0
 			movNumber	       BYTE 0 					; Number of moves, max=9
 			user_selection     DWORD 0 					; Turn of user
@@ -620,16 +608,16 @@ Start_PvC_Game PROC name_pvc:PTR BYTE
 				  mov edx, player_name  ; Print player name
 				  call WriteString
 
-				  mov edx, OFFSET gameTitle ; Print 'vs Computer'
+				  mov edx, OFFSET gameTitle ; Print 'VS Computer'
 				  call WriteString
 				  call Crlf
 				  call Crlf
 
-				  INVOKE Display_Game_Board
-				  INVOKE Display_Game_Moves, ADDR gameBoard
+				  INVOKE Display_Game_Board ; Print game board
+				  INVOKE Display_Game_Moves, ADDR gameBoard ; Prints marks
 
 				  cmp movNumber, 9
-					  jg leaveProc4
+				  jg leaveProc4
 
 				  INVOKE Check_Winner_for_PvC_CvC, ADDR gameBoard, movNumber, name_offset, firstGo, 0
 				  cmp dl, 0
@@ -675,18 +663,17 @@ Start_PvC_Game PROC name_pvc:PTR BYTE
 						mov player_user_type, 1
 						jmp cont1
 
-								U_P1: mov eax, lightGreen
-									   call SetTextColor
+						U_P1: mov eax, lightGreen
+							  call SetTextColor
+							  mov player_user_type, 0
 
-									   mov player_user_type, 0
-
-							    cont1: mov edx, player_name
-										call WriteString
-										mov al, ':'
-										call WriteChar
-										mov al, ' '
-										call WriteChar
-										jmp user_selections
+						cont1: mov edx, player_name
+							   call WriteString
+							   mov al, ':'
+							   call WriteChar
+							   mov al, ' '
+							   call WriteChar
+							   jmp user_selections
 
 				  computer_prompt: cmp firstGo, 1
 									   je C_P1
@@ -778,10 +765,8 @@ Display_Game_Board PROC
 						     mov eax, 0
 						     mov al, LENGTHOF gameBoardPrint
 						     mul bl
-
 						     add edx, eax
 						     call WriteString
-
 						     call Crlf
 						     inc bl
 				  loop printMenu
@@ -790,16 +775,15 @@ Display_Game_Board PROC
 	ret
 Display_Game_Board ENDP
 
-Display_Game_Moves PROC x5:PTR BYTE
+COMMENT $
+	Prints the moves(X and O) on the game board.
+$
+Display_Game_Moves PROC g_table:PTR BYTE
 		.data
-			gameTable EQU [x5 + 4]
+			gameTable EQU [g_table + 4]
 
 			player1Mark  BYTE "X", 0
-
-
 			player2Mark  BYTE "O", 0
-
-
 			boardPos     BYTE 1
 			player_type2 BYTE 0
 
@@ -812,10 +796,10 @@ Display_Game_Moves PROC x5:PTR BYTE
 			mov ebx, gameTable
 			mov esi, ebx
 			mov ecx, 9
-			findMarks: mov al, [esi]
+			findMarks: mov al, [esi]		 ; find marks of all 9 entries
 					   cmp al, 0
 					       jne markFind
-					   returnToLoop: inc esi
+					   returnToLoop: inc esi ; traverse through board if not found
 								     inc boardPos
 			loop findMarks
 			jmp leaveProc5
@@ -830,17 +814,16 @@ Display_Game_Moves PROC x5:PTR BYTE
 					  setPlayer2: mov player_type2, 2
 							      jmp findBoardPos
 
-
-					  findBoardPos: INVOKE Screen_xy_coordinet, boardPos
+					  findBoardPos: INVOKE Set_position, boardPos 	; Set position
 			push ecx
 				mov ecx, 1
 				mov bl, 0
 
-				printMark:  push edx
+				printMark:  push edx 	; Print mark according to the position set
 								cmp player_type2, 1
 									jne getMark
 
-								pMark: mov eax, black + (yellow * 16)
+								pMark: mov eax, lightred
 									   call SetTextColor
 
 								       mov edx, OFFSET player1Mark
@@ -849,7 +832,7 @@ Display_Game_Moves PROC x5:PTR BYTE
 									   mul bl
 									   jmp continuePrint
 
-								getMark: mov eax, black + (blue * 16)
+								getMark: mov eax, yellow
 									     call SetTextColor
 
 										 mov edx, OFFSET player2Mark
@@ -875,7 +858,7 @@ Display_Game_Moves PROC x5:PTR BYTE
 		    leaveProc5: leave
 	ret
 Display_Game_Moves ENDP
-Screen_xy_coordinet PROC x6:BYTE
+Set_position PROC x6:BYTE
 		.data
 			pos EQU [x6 + 4]
 
@@ -951,7 +934,7 @@ Screen_xy_coordinet PROC x6:BYTE
 
 			leaveProc6: leave
 	ret
-Screen_xy_coordinet ENDP
+Set_position ENDP
 Update_Game_Board PROC x4:BYTE, y3:BYTE, w1:DWORD, z1:PTR BYTE
 		.data
 			player_type EQU [x4 + 4]
@@ -1914,7 +1897,7 @@ Start_CvC_Game PROC
 		.data
 			gameBoard2	       BYTE 9 DUP(0)
 
-			gameTitle2	       BYTE "Computer 1 vs. Computer 2", 0
+			gameTitle2	       BYTE "Computer 1 VS Computer 2", 0
 			computer1Move      BYTE "Computer 1", 0
 			computer2Move      BYTE "Computer 2", 0
 			computer_name      BYTE "Computer ", 0
