@@ -548,7 +548,7 @@ Start_PvP_Game PROC name_pvp_1:PTR BYTE, size_pvp_1:BYTE, name_pvp_2:PTR BYTE, s
 									  cmp dl, 1
 											  je Game
 
-								   INVOKE Update_Game_Board, 2, player_user_type3  , user_selection_2, ADDR meBoard22
+								   INVOKE Update_Game_Board, 2, player_user_type3  , user_selection_2, ADDR gameBoard_2
 								   mp dl, 1
 									  je user_selection221
 
