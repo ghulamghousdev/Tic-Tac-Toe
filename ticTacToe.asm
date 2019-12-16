@@ -201,9 +201,9 @@ Print_Instructions_PvC_CvC PROC
 						    BYTE "                  When chosing a move, enter a number corresponding to the position on the board      ", 0
 						    BYTE "                                                                                                      ", 0
 			board_pvc BYTE "                                                                                                        ", 0
-						  BYTE "                                                           - | - | -                                    ", 0
-						  BYTE "                                                           - | - | -                                    ", 0
-						  BYTE "                                                           - | - | -                                    ", 0
+						  BYTE "                                                           1 | 2 | 3                                    ", 0
+						  BYTE "                                                           4 | 5 | 6                                    ", 0
+						  BYTE "                                                           7 | 8 | 9                                    ", 0
 
 
 			name_prompt   BYTE "                               Enter your name to begin: ", 0
@@ -278,9 +278,9 @@ Print_Instructions_for_to_PvP PROC
 						    BYTE "                  When chosing a move, enter a number corresponding to the position on the board        ", 0
 						    BYTE "                                                                                                        ", 0
 			board_pvp BYTE "                                                                                                        ", 0
-						    BYTE "                                                           - | - | -                                    ", 0
-						    BYTE "                                                           - | - | -                                    ", 0
-						    BYTE "                                                           - | - | -                                    ", 0
+						    BYTE "                                                           1 | 2 | 3                                    ", 0
+						    BYTE "                                                           4 | 5 | 6                                    ", 0
+						    BYTE "                                                           7 | 8 | 9                                    ", 0
 
 
 			name_prompt1   BYTE "                               Enter player 1 name : ", 0
@@ -397,10 +397,10 @@ Start_PvP_Game PROC name_pvp_1:PTR BYTE, name_pvp_2:PTR BYTE
 
 			preGame: mov movNumber_pvp, 1
 
-			mov eax, 0
-			mov al, 2
-			call RandomRange
-			mov firstGo22, al
+				mov eax, 0
+				mov al, 2
+				call RandomRange
+				mov firstGo22, al
 
 			jmp Game
 
@@ -563,21 +563,19 @@ Start_PvP_Game ENDP
 
 Start_PvC_Game PROC name_pvc:PTR BYTE
 		.data
-			player_name EQU [name_pvc + 4]
 
-			gameBoard	       BYTE 9 DUP(0)
-
-			gameTitle	       BYTE " vs. Computer", 0
+			player_name EQU [name_pvc + 4]				; Handling parameter
+			gameBoard	       BYTE 9 DUP(0)			; Prints game board
+			gameTitle	       BYTE " vs. Computer", 0	; 'Name' vs Computer
 			computerMove       BYTE "Computer: ", 0
-
-			movNumber	       BYTE 0
-			user_selection     DWORD 0
-			computer_selection DWORD 0
+			movNumber	       BYTE 0 					; Number of moves, max=9
+			user_selection     DWORD 0 					; Turn of user
+			computer_selection DWORD 0 					; Turn of computer
 			name_offset		   DWORD ?
 			firstGo		       BYTE ?
 			player_user_type   BYTE ?
 			comp_user_type     BYTE ?
-			runOnce			   BYTE ?
+			runOnce			   BYTE ? 					; To store no of games played
 
 		.code
 			push ebp
@@ -588,8 +586,8 @@ Start_PvC_Game PROC name_pvc:PTR BYTE
 			cmp runOnce, 1
 				je clearTable
 
-			preGame: mov movNumber, 1
-
+			preGame:
+			mov movNumber, 1
 			mov eax, 0
 			mov al, 2
 			call RandomRange
@@ -605,12 +603,12 @@ Start_PvC_Game PROC name_pvc:PTR BYTE
 						loop zeroOut
 						jmp preGame
 
-			Game: call Clrscr
-
+			Game:
+				  call Clrscr
 				  mov edx, 0
-				  call Gotoxy
+				  call Gotoxy			; Reposition
 
-				  mov ecx, 50
+				  mov ecx, 50 			; Add spaces
 				  mov eax, 0
 				  Spce: mov al, ' '
 				  	    call WriteChar
@@ -619,12 +617,11 @@ Start_PvC_Game PROC name_pvc:PTR BYTE
 				  mov eax, white
 				  call SetTextColor
 
-				  mov edx, player_name
+				  mov edx, player_name  ; Print player name
 				  call WriteString
 
-				  mov edx, OFFSET gameTitle
+				  mov edx, OFFSET gameTitle ; Print 'vs Computer'
 				  call WriteString
-
 				  call Crlf
 				  call Crlf
 
@@ -643,44 +640,47 @@ Start_PvC_Game PROC name_pvc:PTR BYTE
 					  je leaveProc4
 
 				  keepPlaying:
-				  mov dl, 55
-				  mov dh, 23
-				  call Gotoxy
+				  		mov dl, 55
+				 		mov dh, 23
+				  		call Gotoxy
 
-				  mov eax, 0
-				  mov al, movNumber
-				  mov bl, 2
-				  div bl
+				  		mov eax, 0
+				  		mov al, movNumber
+				  		mov bl, 2
+				  		div bl
 
-				  cmp firstGo, 0
-					  je player_first
-				  cmp firstGo, 1
-					  je computer_first
+				  		cmp firstGo, 0
+					  	je player_first
+				  		cmp firstGo, 1
+					  	je computer_first
 
-				  player_first: cmp ah, 1
-								    je player_prompt
-							    cmp ah, 0
-								  je computer_prompt
+				  player_first:
+				  		cmp ah, 1
+						je player_prompt
+					    cmp ah, 0
+						je computer_prompt
 
-				  computer_first: cmp ah, 1
-									  je computer_prompt
-								  cmp ah, 0
-									  je player_prompt
+				  computer_first:
+				  		cmp ah, 1
+						je computer_prompt
+						cmp ah, 0
+						je player_prompt
 
-				  player_prompt: cmp firstGo, 0
-									 je U_P1
+				  player_prompt:
+				  		cmp firstGo, 0
+						je U_P1
 
-				                 mov eax, lightMagenta
-							     call SetTextColor
-								 mov player_user_type, 1
-								 jmp cont1
+				        mov eax, lightMagenta
+						call SetTextColor
+						mov player_user_type, 1
+						jmp cont1
 
-								 U_P1: mov eax, lightGreen
+								U_P1: mov eax, lightGreen
 									   call SetTextColor
 
 									   mov player_user_type, 0
 
-							     cont1: mov edx, player_name
+							    cont1: mov edx, player_name
 										call WriteString
 										mov al, ':'
 										call WriteChar
@@ -756,12 +756,15 @@ Start_PvC_Game PROC name_pvc:PTR BYTE
 	ret
 Start_PvC_Game ENDP
 
+COMMENT $
+	Prints the game board.
+$
 Display_Game_Board PROC
 		.data
 			gameBoardPrint BYTE "                                                                                                        ", 0
-						   BYTE "                                                           - | - | -                                    ", 0
-						   BYTE "                                                           - | - | -                                    ", 0
-						   BYTE "                                                           - | - | -                                    ", 0
+						   BYTE "                                                           1 | 2 | 3                                    ", 0
+						   BYTE "                                                           4 | 5 | 6                                    ", 0
+						   BYTE "                                                           7 | 8 | 9                                    ", 0
 
 		.code
 			push ebp
