@@ -370,7 +370,7 @@ Start_PvP_Game PROC name_pvp_1:PTR BYTE, size_pvp_1:BYTE, name_pvp_2:PTR BYTE, s
 			gameBoard_2	       BYTE 9 DUP(0)
 			gameTitle_2	       BYTE "  vs  ", 0
 
-			movNumber	       BYTE 0
+			movNumber_pvp	       BYTE 0
 			user_selection_1   DWORD 0
 			user_selection_2   DWORD 0
 
@@ -397,7 +397,7 @@ Start_PvP_Game PROC name_pvp_1:PTR BYTE, size_pvp_1:BYTE, name_pvp_2:PTR BYTE, s
 			cmp runOnce2, 1
 				je clearTable
 
-			preGame: mov movNumber2, 1
+			preGame: mov movNumber_pvp2, 1
 
 			mov eax, 0
 			mov al, 2
@@ -443,10 +443,10 @@ Start_PvP_Game PROC name_pvp_1:PTR BYTE, size_pvp_1:BYTE, name_pvp_2:PTR BYTE, s
 				  INVOKE Display_Game_Board
 				  INVOKE Display_Game_Moves, ADDR gameBoard_2
 
-				  cmp movNumber, 9 		; If 9 moves played, end the game
+				  cmp movNumber_pvp, 9 		; If 9 moves played, end the game
 				  jg leaveProc4
 
-				  INVOKE Check_Winner_for_PvP, ADDR gameBoard_2, movNumber, name_offset_1,name_offset_2, firstGo22, 0
+				  INVOKE Check_Winner_for_PvP, ADDR gameBoard_2, movNumber_pvp, name_offset_1,name_offset_2, firstGo22, 0
 				  cmp dl, 0
 					  je keepPlaying
 				  cmp dl, 1
@@ -460,7 +460,7 @@ Start_PvP_Game PROC name_pvp_1:PTR BYTE, size_pvp_1:BYTE, name_pvp_2:PTR BYTE, s
 				  call Gotoxy
 
 				  mov eax, 0
-				  mov al, movNumber
+				  mov al, movNumber_pvp
 				  mov bl, 2
 				  div bl
 
@@ -535,7 +535,7 @@ Start_PvP_Game PROC name_pvp_1:PTR BYTE, size_pvp_1:BYTE, name_pvp_2:PTR BYTE, s
 								   cmp dl, 1
 								   je user_selections
 
-								   inc movNumber
+								   inc movNumber_pvp
 								   jmp Game
 
 				  user_selection221 : mov eax, white
@@ -552,12 +552,12 @@ Start_PvP_Game PROC name_pvp_1:PTR BYTE, size_pvp_1:BYTE, name_pvp_2:PTR BYTE, s
 								   cmp dl, 1
 								   je user_selection221
 
-								   inc movNumber
+								   inc movNumber_pvp
 								   jmp Game
 
-			leaveProc4: cmp movNumber, 10
+			leaveProc4: cmp movNumber_pvp, 10
 							jne justleave
-						INVOKE Check_Winner_for_PvP, ADDR gameBoard_2, movNumber22, name_offset_1,name_offset_2, firstGo22, 0
+						INVOKE Check_Winner_for_PvP, ADDR gameBoard_2, movNumber_pvp, name_offset_1,name_offset_2, firstGo22, 0
 			justleave:	mov runOnce2, 1
 			            leave
 	ret
