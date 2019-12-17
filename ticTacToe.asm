@@ -1,24 +1,26 @@
 INCLUDE Irvine32.inc
 
+;******************** GAME PROCEDURES *************************************
 Start_PvC_Game                   PROTO name_:PTR BYTE
 Start_PvP_Game                   PROTO name_1:PTR BYTE,name_2:PTR BYTE
 Start_CvC_Game			         PROTO
-
+;******************** PRINT PROCEDURES ************************************
 Display_games_played             PROTO count1:BYTE,count2:BYTE,count3:BYTE
 Display_Game_Menu 	             PROTO
-Main_menu_selection  		     PROTO userInput_2:DWORD
-Print_Instructions_PvC_CvC   PROTO
-Print_Instructions_for_to_PvP    PROTO
-validate_input 		     		 PROTO user_input:DWORD, instance_t:BYTE
-Display_Game_Board			     PROTO
-Update_Game_Board                PROTO player_type_:BYTE, assign_type_:BYTE, location_:DWORD, gameBoard_:PTR BYTE
 Display_Game_Moves               PROTO gameBoard_2:PTR BYTE
+Display_Game_Board			     PROTO
+;******************** MENU PROCEDURES *************************************
+Main_menu_selection  		     PROTO userInput_2:DWORD
+Print_Instructions_PvC_CvC		 PROTO
+Print_Instructions_for_to_PvP    PROTO
+Update_Game_Board                PROTO player_type_:BYTE, assign_type_:BYTE, location_:DWORD, gameBoard_:PTR BYTE
 Set_position		             PROTO pos_num_:BYTE
+;******************** VALIDATION PROCEDURES *******************************
+validate_input 		     		 PROTO user_input:DWORD, instance_t:BYTE
 Check_Winner_for_PvP		     PROTO gameBoard_3:DWORD, num_moves_:BYTE, name_221:PTR BYTE,name_222:PTR BYTE, P1_param:BYTE, instanceType_param2:BYTE
 Check_Winner_for_PvC_CvC	     PROTO gameBoard_3:DWORD, num_moves_:BYTE, name_:PTR BYTE, P1_:BYTE, instanceType_2:BYTE
 Test_the_winner		             PROTO param1:BYTE, param2:DWORD, param3:BYTE, param4:DWORD, param5:BYTE, param6:DWORD, gameBoard_3:PTR BYTE
-
-
+;******************** MAIN ************************************************
 .code
 
 main proc
@@ -29,17 +31,16 @@ main proc
 	.code
 		Menu: invoke Display_Game_Menu
 
-		Menu_choice: mov eax, Cyan
-					   call SetTextColor
+		Menu_choice: 
 					   mov edx, OFFSET select_option
 					   call WriteString
 					   call ReadInt
 							mov userInput1, eax
 							INVOKE validate_input, userInput1, 1 	; Validates input
 							cmp dl, 1
-								je Menu_choice
+								je Menu_choice						; Start menu
 							cmp dl, 2
-								je exitProgram
+								je exitProgram						; Jump to exit							
 
 			INVOKE Main_menu_selection, userInput1
 			jmp Menu
@@ -64,8 +65,6 @@ Display_Game_Menu proc
 
 		mov ecx, 5		; Counter to print 5 lines of the menu
 		mov bl, 0
-		mov eax, lightGreen
-		call SetTextColor
 		printMenu2: mov edx, OFFSET Print_Menu
 				    mov eax, 0
 				    mov al, LENGTHOF Print_Menu
@@ -95,6 +94,20 @@ Main_menu_selection PROC x2:DWORD
 			counter_PvC BYTE 0
 		    counter_CvC BYTE 0
 		    counter_PvP BYTE 0
+
+			filename byte "Stats.txt",0
+			filehandle dword ?
+			bytesWritten dword 1 dup(0)
+
+			PvC_one BYTE "1"
+			PvC_two BYTE "2"
+			PvC_three BYTE "3"
+			CvC_one BYTE "1"
+			CvC_two BYTE "2"
+			CvC_three BYTE "3"
+			PvP_one BYTE "1"
+			PvP_two BYTE "2"
+			PvP_three BYTE "3"
 		.code
 			push ebp
 			mov ebp, esp
@@ -119,10 +132,28 @@ Main_menu_selection PROC x2:DWORD
 						jmp leaveProc2
 			Option3_GO: INVOKE Print_Instructions_for_to_PvP	; Calls PvP
 						call Clrscr
-						inc counter_CvC
+						inc counter_PvP
 						jmp leaveProc2
 			; On exit, show statistics of all games played
-			Option4_GO:	INVOKE Display_games_played, counter_PvC, counter_CvC, counter_PvP
+			Option4_GO:	
+						INVOKE createFile,
+						ADDR filename,
+						GENERIC_WRITE,
+						DO_NOT_SHARE,
+						NULL,
+						OPEN_ALWAYS,
+						FILE_ATTRIBUTE_NORMAL,
+						0
+						mov filehandle, eax
+						
+						cmp counter_PvC,1
+						je pvc1
+
+
+			pvc1:
+					INVOKE WriteFile,filehandle,addr PvC_one,sizeof PvC_one,addr bytesWritten,0	
+					
+					INVOKE Display_games_played, counter_PvC, counter_CvC, counter_PvP
 
 	leaveProc2:	leave
 	ret
@@ -141,39 +172,23 @@ Display_games_played   PROC count1_PvC:BYTE,count2_CvC:BYTE,count3_PvP:BYTE
 	call Crlf
 	call Crlf
 	call Crlf
-	mov eax,green
-	call SetTextColor
 	mov edx,offset statics_msg_PvC
 	call WriteString
-	mov eax,blue
-	call SetTextColor
 	mov al, count1_PvC
 	call WriteDec
 	call Crlf
-
-	mov eax,green
-	call SetTextColor
 	mov edx,offset statics_msg_CvC
 	call WriteString
-	mov eax,blue
-	call SetTextColor
 	mov al, count2_CvC
 	call WriteDec
 	call Crlf
-
-	mov eax,green
-	call SetTextColor
 	mov edx,offset statics_msg_PvP
 	call WriteString
-	mov eax,blue
-	call SetTextColor
 	mov al, count3_PvP
 	call WriteDec
 
 	call Crlf
 	call Crlf
-	mov eax,red
-	call SetTextColor
 	call WaitMsg		; Waits for exit
 	exit
 Display_games_played ENDP
@@ -1062,6 +1077,8 @@ Update_Game_Board PROC x4:BYTE, y3:BYTE, w1:DWORD, z1:PTR BYTE
 			leaveProc3: leave
 	ret
 Update_Game_Board ENDP
+
+;To check winner for Player vs Player game mode
 Check_Winner_for_PvP PROC x7:DWORD, y4:BYTE, w2:PTR BYTE,w3:PTR BYTE, z2:BYTE, in1:BYTE
 		.data
 			game_board2 EQU [x7 + 4]
@@ -1296,6 +1313,14 @@ Check_Winner_for_PvP PROC x7:DWORD, y4:BYTE, w2:PTR BYTE,w3:PTR BYTE, z2:BYTE, i
 
 	ret
 Check_Winner_for_PvP ENDP
+
+
+
+
+
+
+
+
 Check_Winner_for_PvC_CvC PROC x7:DWORD, y4:BYTE, w2:PTR BYTE, z2:BYTE, in1:BYTE
 		.data
 			game_board2 EQU [x7 + 4]
@@ -1535,6 +1560,8 @@ Check_Winner_for_PvC_CvC PROC x7:DWORD, y4:BYTE, w2:PTR BYTE, z2:BYTE, in1:BYTE
 
 	ret
 Check_Winner_for_PvC_CvC ENDP
+
+
 Test_the_winner PROC p1:BYTE, p2:DWORD, p3:BYTE, p4:DWORD, p5:BYTE, p6:DWORD, x8:PTR BYTE
 		.data
 			r1 			EQU [p1 + 4]
@@ -1551,8 +1578,6 @@ Test_the_winner PROC p1:BYTE, p2:DWORD, p3:BYTE, p4:DWORD, p5:BYTE, p6:DWORD, x8
 			instance	 BYTE ?
 
 			row_size2    BYTE 3
-
-
 
 	    .code
 			push ebp
@@ -1611,15 +1636,15 @@ Test_the_winner PROC p1:BYTE, p2:DWORD, p3:BYTE, p4:DWORD, p5:BYTE, p6:DWORD, x8
 										jne no_win
 								   mov al, test_num2
 								   cmp al, test_num3
-										jne no_win
-
+										jne no_win	; There is no win
+								   ; The game is a win
 								   mov al, test_num1
 								   add al, test_num2
 								   add al, test_num3
-
-								   cmp al, 3
+								   ; Decide which player has won
+								   cmp al, 3	; Because p1 sets 1
 									   je P1Win
-								   cmp al, 6
+								   cmp al, 6	; Because p2 sets 2
 									   je P2Win
 								   jmp no_win
 
