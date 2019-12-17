@@ -17,7 +17,7 @@ Set_position		             PROTO pos_num_:BYTE
 Check_Winner_for_PvP		     PROTO gameBoard_3:DWORD, num_moves_:BYTE, name_221:PTR BYTE,name_222:PTR BYTE, P1_param:BYTE, instanceType_param2:BYTE
 Check_Winner_for_PvC_CvC	     PROTO gameBoard_3:DWORD, num_moves_:BYTE, name_:PTR BYTE, P1_:BYTE, instanceType_2:BYTE
 Test_the_winner		             PROTO param1:BYTE, param2:DWORD, param3:BYTE, param4:DWORD, param5:BYTE, param6:DWORD, gameBoard_3:PTR BYTE
-Display_winner_Draw			     PROTO l_1:BYTE, h_2:BYTE, l_3:BYTE, h_4:BYTE, l_5:BYTE, h_6:BYTE, path_type_:BYTE
+
 
 .code
 
@@ -1279,44 +1279,10 @@ Check_Winner_for_PvP PROC x7:DWORD, y4:BYTE, w2:PTR BYTE,w3:PTR BYTE, z2:BYTE, i
 				  pop edx
 				  call Crlf
 
-				  jmp leaveProc7
+				  jmp fillPath
 
 
-			fillPath: cmp test_counter2, 1
-						  je DT1
-					  cmp test_counter2, 2
-						  je DT2
-					  cmp test_counter2, 3
-						  je DT3
-					  cmp test_counter2, 4
-						  je DT4
-					  cmp test_counter2, 5
-						  je DT5
-					  cmp test_counter2, 6
-						  je DT6
-					  cmp test_counter2, 7
-						  je DT7
-					  cmp test_counter2, 8
-						  je DT8
-
-
-					  DT1: INVOKE Display_winner_Draw, 40, 3, 55, 3, 70, 3, path_type2
-						   jmp leaveProc7
-					  DT2: INVOKE Display_winner_Draw, 40, 3, 55, 9, 70, 15, path_type2
-						   jmp leaveProc7
-					  DT3: INVOKE Display_winner_Draw, 40, 9, 55, 9, 70, 9, path_type2
-						   jmp leaveProc7
-					  DT4: INVOKE Display_winner_Draw, 40, 15, 55, 15, 70, 15, path_type2
-						   jmp leaveProc7
-					  DT5: INVOKE Display_winner_Draw, 40, 3, 40, 9, 40, 15, path_type2
-						   jmp leaveProc7
-					  DT6: INVOKE Display_winner_Draw, 55, 3, 55, 9, 55, 15, path_type2
-						   jmp leaveProc7
-					  DT7: INVOKE Display_winner_Draw, 70, 3, 70, 9, 70, 15, path_type2
-						   jmp leaveProc7
-					  DT8: INVOKE Display_winner_Draw, 40, 15, 55, 9, 70, 3, path_type2
-						   jmp leaveProc7
-			leaveProc7: mov eax, white
+			fillPath: mov eax, white
 						call SetTextColor
 
 						push edx
@@ -1552,44 +1518,10 @@ Check_Winner_for_PvC_CvC PROC x7:DWORD, y4:BYTE, w2:PTR BYTE, z2:BYTE, in1:BYTE
 				  pop edx
 				  call Crlf
 
-				  jmp leaveProc7
+				  jmp fillPath
 
 
-			fillPath: cmp test_counter, 1
-						  je DT1
-					  cmp test_counter, 2
-						  je DT2
-					  cmp test_counter, 3
-						  je DT3
-					  cmp test_counter, 4
-						  je DT4
-					  cmp test_counter, 5
-						  je DT5
-					  cmp test_counter, 6
-						  je DT6
-					  cmp test_counter, 7
-						  je DT7
-					  cmp test_counter, 8
-						  je DT8
-
-
-					  DT1: INVOKE Display_winner_Draw, 40, 3, 55, 3, 70, 3, path_type
-						   jmp leaveProc7
-					  DT2: INVOKE Display_winner_Draw, 40, 3, 55, 9, 70, 15, path_type
-						   jmp leaveProc7
-					  DT3: INVOKE Display_winner_Draw, 40, 9, 55, 9, 70, 9, path_type
-						   jmp leaveProc7
-					  DT4: INVOKE Display_winner_Draw, 40, 15, 55, 15, 70, 15, path_type
-						   jmp leaveProc7
-					  DT5: INVOKE Display_winner_Draw, 40, 3, 40, 9, 40, 15, path_type
-						   jmp leaveProc7
-					  DT6: INVOKE Display_winner_Draw, 55, 3, 55, 9, 55, 15, path_type
-						   jmp leaveProc7
-					  DT7: INVOKE Display_winner_Draw, 70, 3, 70, 9, 70, 15, path_type
-						   jmp leaveProc7
-					  DT8: INVOKE Display_winner_Draw, 40, 15, 55, 9, 70, 3, path_type
-						   jmp leaveProc7
-			leaveProc7: mov eax, white
+			fillPath:  mov eax, white
 						call SetTextColor
 
 						push edx
@@ -1703,194 +1635,6 @@ Test_the_winner PROC p1:BYTE, p2:DWORD, p3:BYTE, p4:DWORD, p5:BYTE, p6:DWORD, x8
 	ret
 Test_the_winner ENDP
 
-Display_winner_Draw PROC l_p1:BYTE, h_p2:BYTE, l_p3:BYTE, h_p4:BYTE, l_p5:BYTE, h_p6:BYTE, x9:BYTE
-		.data
-			dl_1	  EQU [l_p1 + 4]
-			dh_1	  EQU [h_p2 + 4]
-			dl_2	  EQU [l_p3 + 4]
-			dh_2	  EQU [h_p4 + 4]
-			dl_3	  EQU [l_p5 + 4]
-			dh_3	  EQU [h_p6 + 4]
-			X_or_O    EQU [x9 + 4]
-
-			player1Mark_  BYTE " X ", 0
-
-
-			player2Mark_  BYTE " O ", 0
-
-
-		.code
-			push ebp
-			mov ebp, esp
-
-			mov eax, 1000
-			call Delay
-
-			push edx
-
-			mov eax, black + (lightGreen * 16)
-			call SetTextColor
-
-			; SQUARE 1
-			mov dl, dl_1
-			mov dh, dh_1
-			call Gotoxy
-			mov ecx, 5
-			square1: push ecx
-						mov ecx, 14
-						square1a: mov al, ' '
-								  call WriteChar
-								  inc dl
-								  call Gotoxy
-						loop square1a
-					 pop ecx
-					 sub dl, 14
-					 inc dh
-					 call Gotoxy
-			loop square1
-
-			mov dl, dl_1
-			add dl, 4
-			mov dh, dh_1
-			call Gotoxy
-
-			mov bl, 0
-			mov ecx, 1
-			mov eax, black + (lightGreen * 16)
-			call SetTextColor
-			printMark: push edx
-							cmp X_or_O, 1
-								je O_path
-
-							X_path: mov edx, OFFSET player1Mark_
-								    mov eax, 0
-								    mov al, LENGTHOF player1Mark_
-								    mul bl
-								    jmp continuePrint
-
-							O_path: mov edx, OFFSET player2Mark_
-									mov eax, 0
-									mov al, LENGTHOF player2Mark_
-									mul bl
-
-							continuePrint: add edx, eax
-										   call WriteString
-					   pop edx
-					   inc dh
-				       call Gotoxy
-				       inc bl
-			loop printMark
-
-			mov eax, black + (lightGreen * 16)
-			call SetTextColor
-
-			;SQUARE 2:
-			mov dl, dl_2
-			mov dh, dh_2
-			call Gotoxy
-			mov ecx, 5
-			square2: push ecx
-						mov ecx, 14
-						square2a: mov al, ' '
-								  call WriteChar
-								  inc dl
-								  call Gotoxy
-						loop square2a
-					 pop ecx
-					 sub dl, 14
-					 inc dh
-					 call Gotoxy
-			loop square2
-
-			mov dl, dl_2
-			add dl, 4
-			mov dh, dh_2
-			call Gotoxy
-
-			mov bl, 0
-			mov ecx, 1
-			mov eax, black + (lightGreen * 16)
-			call SetTextColor
-			printMark2: push edx
-							cmp X_or_O, 1
-								je O_path2
-
-							X_path2: mov edx, OFFSET player1Mark_
-								     mov eax, 0
-								     mov al, LENGTHOF player1Mark_
-								     mul bl
-								     jmp continuePrint2
-
-							O_path2: mov edx, OFFSET player2Mark_
-									 mov eax, 0
-									 mov al, LENGTHOF player2Mark_
-									 mul bl
-
-							continuePrint2: add edx, eax
-										    call WriteString
-					   pop edx
-					   inc dh
-				       call Gotoxy
-				       inc bl
-			loop printMark2
-
-			mov eax, black + (lightGreen * 16)
-			call SetTextColor
-
-			; SQUARE 3:
-			mov dl, dl_3
-			mov dh, dh_3
-			call Gotoxy
-			mov ecx, 5
-			square3: push ecx
-						mov ecx, 14
-						square3a: mov al, ' '
-								  call WriteChar
-								  inc dl
-								  call Gotoxy
-						loop square3a
-					 pop ecx
-					 sub dl, 14
-					 inc dh
-					 call Gotoxy
-			loop square3
-
-			mov dl, dl_3
-			add dl, 4
-			mov dh, dh_3
-			call Gotoxy
-
-			mov bl, 0
-			mov ecx, 1
-			mov eax, black + (lightGreen * 16)
-			call SetTextColor
-			printMark3: push edx
-							cmp X_or_O, 1
-								je O_path3
-
-							X_path3: mov edx, OFFSET player1Mark_
-								     mov eax, 0
-								     mov al, LENGTHOF player1Mark_
-								     mul bl
-								     jmp continuePrint3
-
-							O_path3: mov edx, OFFSET player2Mark_
-									 mov eax, 0
-									 mov al, LENGTHOF player2Mark_
-									 mul bl
-
-							continuePrint3: add edx, eax
-										    call WriteString
-					   pop edx
-					   inc dh
-				       call Gotoxy
-				       inc bl
-			loop printMark3
-
-			pop edx
-			leave
-	ret
-Display_winner_Draw ENDP
 
 
 Start_CvC_Game PROC
